@@ -1,0 +1,101 @@
+================================================================================
+DOCUMENTO DE ESPECIFICAÇÃO DE FEATURE (USER STORY / REQUISITO)
+================================================================================
+PROJETO: Sistema de Gestão Comunitária de Mantimentos - AMABE
+FEATURE: Criação da Tela 2 — Execução da Funcionalidade Central (Consulta e Retirada)
+VERSÃO: 1.0 (MVP)
+================================================================================
+
+1. VISÃO GERAL E OBJETIVO DE NEGÓCIO
+--------------------------------------------------------------------------------
+Como operador voluntário ou coordenador da AMABE (Associação de Moradores e 
+Amigos do Bairro Esperança), desejo consultar rapidamente um beneficiário pelo 
+número de CPF e registrar a retirada da cesta básica (ou realizar um cadastro 
+simplificado caso não exista registro), para que o atendimento no balcão seja 
+concluído em menos de 90 segundos, substituindo as fichas de papel e eliminando 
+erros de duplicidade na entrega.
+
+2. CONTEXTO DE USO E PÚBLICO-ALVO
+--------------------------------------------------------------------------------
+- Ambiente: Balcão de atendimento presencial no galpão da AMABE, operando em 
+  smartphones com tela reduzida sob condições reais de fila e movimento.
+- Perfil do Usuário: Voluntários locais com baixa a moderada familiaridade 
+  digital, que precisam de campos claros, máscaras automáticas e etapas 
+  sequenciais bem delimitadas.
+
+3. ESTRUTURA E COMPONENTES DA INTERFACE (BASEADO NO PROTÓTIPO TELA 2)
+--------------------------------------------------------------------------------
+3.1. Barra de Busca Destacada por CPF (RF02):
+     - Rótulo Persistente: Etiqueta superior de alto contraste "Buscar 
+       Beneficiário por CPF", evitando que a instrução desapareça ao digitar.
+     - Campo de Entrada: Caixa de texto ampla com ícone semântico de usuário à 
+       esquerda e máscara numérica automática no padrão "000.000.000-00", 
+       acionando teclado numérico nativo em dispositivos móveis.
+     - Botão de Ação "PESQUISAR": Botão azul escuro de alto contraste posicionado 
+       ao lado do campo, combinando ícone de lupa + rótulo textual "PESQUISAR".
+
+3.2. Painel de Resultados e Ações Sequenciais (Cards Internos):
+     Organizado em blocos visuais com bordas laterais verdes para facilitar a 
+     leitura rápida (escaneabilidade):
+     a) Bloco 1 — "DADOS DO BENEFICIÁRIO ENCONTRADO":
+        * Exibe o nome completo e dados essenciais do titular localizado na base 
+          MySQL, ou informa claramente caso o CPF ainda não possua cadastro.
+     b) Bloco 2 — "REGISTRAR RETIRADA" (RF03):
+        * Apresenta automaticamente a data corrente da operação (ex.: 15/11/2026) 
+          e o item padrão ("Cesta Básica"), acompanhado do botão de confirmação 
+          para gravar a entrega e validar a trava de carência mensal.
+     c) Bloco 3 — "DADOS DO NOVO CADASTRO (Opcional)" (RF01):
+        * Seção expansível ou habilitada caso o CPF consultado não seja 
+          encontrado, permitindo o preenchimento rápido (nome completo, endereço 
+          no Bairro Esperança e membros da família) sem sair da tela de fluxo.
+
+4. REQUISITOS DE ACESSIBILIDADE E USABILIDADE (RNF04)
+--------------------------------------------------------------------------------
+- Alvos de Toque Amplos: O campo de CPF, o botão "PESQUISAR" e os botões de 
+  confirmação possuem área mínima interativa de 44x44px (destacada pelo foco 
+  pontilhado/contorno), prevenindo erros de toque no celular.
+- Contraste e Tipografia: Títulos em caixa alta e negrito com contraste >= 4,5:1 
+  sobre fundo branco/azul claro, facilitando a leitura sob luz natural ou 
+  artificial do galpão.
+- Rótulos Persistentes e Feedback Claro: Uso obrigatório de labels fixos acima 
+  dos inputs (nunca dependendo apenas de placeholder) e indicadores visuais 
+  laterais (barras verdes) associados a títulos descritivos.
+- Navegação por Teclado: Ordem sequencial lógica (Campo CPF -> Botão Pesquisar 
+  -> Confirmar Retirada) com anel de foco visível.
+
+5. CRITÉRIOS DE ACEITAÇÃO (GHERKIN / BDD)
+--------------------------------------------------------------------------------
+Cenário 1: Busca de beneficiário cadastrado por CPF
+  Dado que o operador está na Tela 2 (Execução Central)
+  Quando ele digitar um CPF válido (ex.: 123.456.789-00) e acionar "PESQUISAR"
+  Então o sistema deve consultar o banco de dados em menos de 2 segundos (RNF02)
+  E exibir os dados do titular no bloco "DADOS DO BENEFICIÁRIO ENCONTRADO".
+
+Cenário 2: Registro de retirada com sucesso (Fluxo Principal)
+  Dado que o beneficiário foi localizado e está apto a receber a cesta no mês
+  Quando o operador confirmar a operação na seção "REGISTRAR RETIRADA"
+  Então o sistema deve gravar o registro na tabela `retiradas` com a data atual
+  E redirecionar imediatamente para a Tela 3 exibindo o status de sucesso.
+
+Cenário 3: Bloqueio por trava de carência mensal (Regra de Negócio RF03)
+  Dado que o beneficiário localizado já retirou uma cesta no mês vigente
+  Quando o operador tentar confirmar uma nova retirada
+  Então o banco de dados/sistema deve impedir a duplicidade
+  E direcionar para a Tela 3 com o alerta visual e textual de bloqueio mensal.
+
+Cenário 4: Fluxo de novo cadastro quando CPF não é encontrado
+  Dado que o operador pesquisou um CPF inexistente na base da AMABE
+  Quando o sistema retornar que o beneficiário não foi encontrado
+  Então a seção "DADOS DO NOVO CADASTRO" deve permitir registrar a família 
+  rapidamente para prosseguir com o atendimento.
+
+6. RASTREABILIDADE DE REQUISITOS E IMPACTO SOCIAL
+--------------------------------------------------------------------------------
+- Requisitos Relacionados: RF01 (Cadastro), RF02 (Consulta por CPF), RF03 
+  (Registro de Retirada e Trava Mensal), RNF02 (Tempo de Resposta) e RNF04 
+  (Acessibilidade).
+- Impacto Comunitário (ODS 2 - Meta 2.1): Concentra as operações críticas em uma 
+  única tela intuitiva, garantindo que o atendimento completo dure menos de 90 
+  segundos e assegurando transparência e justiça na distribuição de alimentos 
+  às 450 famílias do Bairro Esperança.
+================================================================================
