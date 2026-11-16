@@ -1,0 +1,78 @@
+================================================================================
+PLANO DE TESTES DE USABILIDADE, VALIDAÇÃO TÉCNICA E CORREÇÕES — PROJETO AMABE
+================================================================================
+SISTEMA: MVP Gestão Comunitária de Mantimentos (AMABE - Bairro Esperança)
+VERSÃO: 1.0
+PÚBLICO-ALVO DA VALIDAÇÃO: Equipe Voluntária e Coordenação (Rep. Maria das Graças)
+================================================================================
+
+1. OBJETIVO DO DOCUMENTO
+--------------------------------------------------------------------------------
+Este documento consolida o roteiro de testes funcionais, de banco de dados e de 
+usabilidade aplicada no balcão da AMABE, bem como as regras de decisão para 
+correção de falhas antes da implantação definitiva (deploy).
+
+2. ESCOPO DE TESTES TÉCNICOS E DE BANCO DE DADOS (MYSQL)
+--------------------------------------------------------------------------------
+[CT-01] Autenticação e Controle de Acesso (RNF01)
+  - Ação: Tentar acessar o sistema com credenciais válidas e inválidas.
+  - Resultado Esperado: Acesso liberado apenas com senha válida (hash bcrypt); 
+    bloqueio com mensagem clara em caso de erro.
+
+[CT-02] Consulta Rápida por CPF e Performance (RF02 / RNF02)
+  - Ação: Pesquisar o CPF fictício '123.456.789-00' na Tela 2.
+  - Resultado Esperado: Retorno dos dados do titular em menos de 2 segundos 
+    utilizando o índice único `uk_beneficiarios_cpf`.
+
+[CT-03] Registro de Retirada e Trava de Carência Mensal (RF03)
+  - Ação: Registrar uma entrega para um CPF apto e, em seguida, tentar registrar 
+    uma segunda entrega para o mesmo CPF no mesmo mês (YYYY-MM).
+  - Resultado Esperado: Primeira gravação concluída com sucesso; segunda 
+    tentativa bloqueada pela restrição `uk_trava_carencia_mensal` do MySQL, 
+    disparando o alerta na Tela 3.
+
+[CT-04] Acessibilidade e Responsividade Móvel (RNF04)
+  - Ação: Navegar pelas 3 telas em smartphone (tela reduzida) e via teclado (Tab).
+  - Resultado Esperado: Alvos de toque >= 44x44px, contraste >= 4,5:1 e 
+    alertas compreensíveis sem depender exclusivamente de cores.
+
+3. ROTEIRO DE TESTE PRÁTICO COM USUÁRIO (USABILIDADE)
+--------------------------------------------------------------------------------
+- Tarefa 1 (Menu Inicial): Autenticar-se e iniciar o atendimento na Tela 1.
+- Tarefa 2 (Fluxo Central): Localizar beneficiário por CPF e confirmar entrega 
+  na Tela 2 (Tempo limite: <= 90 segundos).
+- Tarefa 3 (Feedback/Alerta): Interpretar o alerta de bloqueio mensal na Tela 3 
+  e retornar para um novo atendimento.
+
+4. MÉTRICAS E CRITÉRIOS DE ACEITAÇÃO
+--------------------------------------------------------------------------------
+- Usabilidade (Taxa de Sucesso): 100% (conclusão das 3 tarefas propostas).
+- Eficiência (Tempo de Execução): <= 90 segundos na Tarefa 2 (fluxo central).
+- Satisfação (Escala Likert 1 a 5): Nota média >= 4,0 na facilidade de uso.
+
+5. REGISTRO DE LOG DE OBSERVAÇÕES E PLANO DE CORREÇÕES (BUGS / MELHORIAS)
+--------------------------------------------------------------------------------
+[COR-01] Severidade: ALTA (Obrigatória antes do Deploy)
+  - Problema Observado: Dificuldade de leitura em telas sob luz intensa do 
+    galpão caso o feedback dependa apenas de cor.
+  - Ação Corretiva: Garantir redundância multimodal em 100% dos banners da Tela 3 
+    (Ícone de Check/Alerta + Cor de Alto Contraste + Texto Explícito).
+
+[COR-02] Severidade: ALTA (Obrigatória antes do Deploy)
+  - Problema Observado: Erro de digitação de pontos e traços no campo de CPF 
+    atrasando o atendimento no balcão.
+  - Ação Corretiva: Implementar máscara automática (`000.000.000-00`) e forçar 
+    teclado numérico nativo (`inputmode="numeric"`) na Tela 2.
+
+[COR-03] Severidade: MÉDIA (Ajuste Recomendado)
+  - Problema Observado: Hesitação sobre como voltar ao início após consultar 
+    o resumo mensal.
+  - Ação Corretiva: Fixar botão de retorno claro ("Novo Atendimento" / "Menu 
+    Inicial") com área mínima de 44x44px no rodapé da Tela 3.
+
+[COR-04] Severidade: BAIXA (Iteração Futura / Backlog)
+  - Problema Observado: Necessidade de controle de estoque físico de cestas 
+    no galpão.
+  - Ação Corretiva: Priorizar módulo de entrada de doações para a versão 2.0 
+    do sistema, mantendo o foco do MVP 1.0 na agilidade da fila.
+================================================================================
