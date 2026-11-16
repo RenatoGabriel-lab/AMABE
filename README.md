@@ -1,4 +1,4 @@
-================================================================================
+
 SISTEMA DE GESTÃO COMUNITÁRIA DE MANTIMENTOS — AMABE (BAIRRO ESPERANÇA)
 ================================================================================
 Associação de Moradores e Amigos do Bairro Esperança (AMABE)
