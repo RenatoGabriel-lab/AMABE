@@ -1,0 +1,109 @@
+================================================================================
+DOCUMENTO DE ESPECIFICAÇÃO DE FEATURE (USER STORY / REQUISITO)
+================================================================================
+PROJETO: Sistema de Gestão Comunitária de Mantimentos - AMABE
+FEATURE: Criação da Tela 3 — Alertas, Feedback Operacional e Resultados
+VERSÃO: 1.0 (MVP)
+================================================================================
+
+1. VISÃO GERAL E OBJETIVO DE NEGÓCIO
+--------------------------------------------------------------------------------
+Como operador voluntário ou coordenador da AMABE (Associação de Moradores e 
+Amigos do Bairro Esperança), desejo visualizar imediatamente um retorno claro, 
+inequívoco e acessível após tentar registrar a entrega de uma cesta básica, 
+para que eu possa tomar a decisão operacional correta no balcão (liberar o 
+mantimento ao beneficiário ou orientá-lo sobre o bloqueio por carência mensal) 
+e iniciar o próximo atendimento sem demora.
+
+2. CONTEXTO DE USO E PÚBLICO-ALVO
+--------------------------------------------------------------------------------
+- Ambiente: Balcão de entrega presencial no galpão da AMABE, onde o operador 
+  precisa confirmar visualmente a operação para o beneficiário à sua frente e 
+  dar vazão rápida à fila de espera.
+- Perfil do Usuário: Voluntários e coordenação (ex.: Maria das Graças) com 
+  baixa a moderada familiaridade digital, que necessitam de alertas multimodais 
+  de fácil leitura sob condições de iluminação variada.
+
+3. ESTRUTURA E COMPONENTES DA INTERFACE (BASEADO NO PROTÓTIPO TELA 3)
+--------------------------------------------------------------------------------
+3.1. Cabeçalho e Contexto de Sessão:
+     - Barra superior institucional "AMABE" em alto contraste.
+     - Identificação da operadora ativa ("Conectada como Maria das Graças") e 
+       título de seção "MENU OPERACIONAL".
+
+3.2. Banner Central de Feedback Operacional (RF03):
+     Exibe de forma destacada o resultado da transação no banco de dados em 
+     dois possíveis estados:
+     a) Estado 1 — Sucesso na Entrega (Exibido no protótipo):
+        * Moldura de destaque verde com ícone de confirmação (checkmark) + 
+          rótulo textual explícito "Sucesso na Entrega".
+        * Decisão operacional: Autoriza o voluntário a entregar fisicamente a 
+          cesta básica ao titular.
+     b) Estado 2 — Bloqueio por Carência Mensal:
+        * Moldura de alerta âmbar/vermelha com ícone de aviso (triângulo de 
+          exclamação) + texto claro "Atenção: Cesta já retirada neste mês".
+        * Decisão operacional: Impede a entrega duplicada e permite orientar o 
+          beneficiário sobre a data de elegibilidade no mês seguinte.
+
+3.3. Resumo da Operação (Comprovante em Tela):
+     Card informativo contendo os dados consolidados do atendimento:
+     - DADOS DO BENEFICIÁRIO: Nome Completo (ex.: João Carlos Silva) e CPF 
+       mascarado/formatado (ex.: 123.456.789-00).
+     - RETIRADA CONFIRMADA: Status ("Cesta Básica Entregue: Sim") e carimbo 
+       de Data e Hora exatos da gravação no MySQL (ex.: 15/11/2026 - 10:48).
+
+3.4. Ações de Continuidade e Indicador Gerencial (RF04):
+     - Botão Primário "NOVO ATENDIMENTO": Botão verde de destaque com ícone de 
+       usuário/cesta que redireciona o operador de volta à Tela 2 para atender 
+       o próximo cidadão da fila.
+     - Botão Secundário "RESUMO DO MÊS": Botão azul claro com ícone de 
+       relatório que permite à coordenação consultar o consolidado mensal.
+     - Rodapé Informativo: Exibe o indicador numérico em tempo real do total 
+       de cestas entregues no mês vigente (ex.: "Total de cestas no mês: 142") 
+       e a rastreabilidade técnica (RNF02 e RNF04).
+
+4. REQUISITOS DE ACESSIBILIDADE E USABILIDADE (RNF04)
+--------------------------------------------------------------------------------
+- Redundância Multimodal (Independência de Cor): O status da operação nunca é 
+  transmitido apenas pela cor verde ou vermelha; combina obrigatoriamente 
+  cor de alto contraste (>= 4,5:1) + ícone semântico (check ou alerta) + 
+  mensagem textual direta.
+- Alvos de Toque Amplos: Os botões "NOVO ATENDIMENTO" e "RESUMO DO MÊS" 
+  possuem área mínima de toque superior a 44x44px e espaçamento seguro entre 
+  eles para evitar cliques acidentais.
+- Hierarquia Visual Clara: O resultado da operação ocupa o centro da tela em 
+  tipografia ampliada, garantindo compreensão instantânea sem necessidade de 
+  rolagem (scroll).
+
+5. CRITÉRIOS DE ACEITAÇÃO (GHERKIN / BDD)
+--------------------------------------------------------------------------------
+Cenário 1: Exibição de confirmação após registro de retirada válido
+  Dado que o operador confirmou a retirada na Tela 2 para um beneficiário apto
+  Quando o banco de dados gravar o registro com sucesso
+  Então a Tela 3 deve exibir o banner verde com ícone de check e o texto 
+  "Sucesso na Entrega"
+  E apresentar o nome do beneficiário, CPF, data/hora e o total atualizado de 
+  cestas entregues no mês.
+
+Cenário 2: Exibição de alerta de bloqueio por carência mensal (RF03)
+  Dado que o sistema detectou que o CPF já possui retirada no mês corrente
+  Quando a Tela 3 for carregada
+  Então o banner deve exibir o alerta visual (ícone de aviso + cor de alerta) 
+  com a mensagem informando que a cesta já foi retirada no mês vigente.
+
+Cenário 3: Continuidade rápida do fluxo de atendimento
+  Dado que o operador visualizou o resultado da entrega na Tela 3
+  Quando ele clicar ou tocar no botão "NOVO ATENDIMENTO"
+  Então o sistema deve retornar imediatamente para a Tela 2 com o campo de 
+  busca por CPF limpo e pronto para o próximo atendimento.
+
+6. RASTREABILIDADE DE REQUISITOS E IMPACTO SOCIAL
+--------------------------------------------------------------------------------
+- Requisitos Relacionados: RF03 (Registro de Retirada e Trava Mensal), RF04 
+  (Indicador Total no Mês), RNF02 (Tempo de Resposta < 2s) e RNF04 
+  (Acessibilidade Multimodal).
+- Impacto Comunitário (ODS 2 - Meta 2.1): Garante segurança operacional ao 
+  voluntário no momento crítico da entrega física do alimento, evitando 
+  conflitos no balcão, assegurando transparência com o comprovante em tela e 
+  agilizando o giro da fila para as 450 famílias do Bairro Esperança.
+================================================================================
