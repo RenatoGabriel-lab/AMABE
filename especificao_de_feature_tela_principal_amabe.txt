@@ -1,0 +1,94 @@
+================================================================================
+DOCUMENTO DE ESPECIFICAÇÃO DE FEATURE (USER STORY / REQUISITO)
+================================================================================
+PROJETO: Sistema de Gestão Comunitária de Mantimentos - AMABE
+FEATURE: Criação da Tela Principal (Tela 1 — Entrada Principal / Menu Inicial)
+VERSÃO: 1.0 (MVP)
+================================================================================
+
+1. VISÃO GERAL E OBJETIVO DE NEGÓCIO
+--------------------------------------------------------------------------------
+Como operador voluntário ou coordenador da AMABE (Associação de Moradores e 
+Amigos do Bairro Esperança), desejo acessar uma tela inicial limpa, direta e de 
+fácil compreensão logo após a autenticação, para que eu possa iniciar rapidamente 
+o atendimento de entrega de cestas básicas ou realizar o cadastro de novas 
+famílias, reduzindo filas e erros operacionais no balcão presencial.
+
+2. CONTEXTO DE USO E PÚBLICO-ALVO
+--------------------------------------------------------------------------------
+- Ambiente: Galpão comunitário da AMABE (iluminação variável, uso em smartphones 
+  ou tablets conectados à rede móvel).
+- Perfil do Usuário: Voluntários e coordenação com familiaridade digital baixa a 
+  moderada, que necessitam de foco nas ações essenciais sem sobrecarga cognitiva.
+
+3. ESTRUTURA E COMPONENTES DA INTERFACE (BASEADO NO PROTÓTIPO TELA 1)
+--------------------------------------------------------------------------------
+3.1. Cabeçalho Institucional (Top Bar):
+     - Identificação da Organização: Logotipo/Título "AMABE" alinhado à esquerda 
+       em alto contraste sobre fundo azul escuro.
+     - Identificação da Sessão: Ícone de perfil e rótulo "Operador Voluntário" 
+       (ou nome do usuário autenticado) para ciência de quem está operando.
+     - Ação Secundária de Saída: Botão/Link sublinhado "Sair" alinhado à direita 
+       para encerramento seguro da sessão (RNF01).
+
+3.2. Banner de Boas-Vindas e Contexto:
+     - Card informativo centralizado contendo a mensagem institucional:
+       "SISTEMA DE GESTÃO AMABE. Digitalizando o controle comunitário de mantimentos."
+     - Objetivo: Situar o operador imediatamente sobre o propósito da ferramenta.
+
+3.3. Área de Ações Prioritárias (Cartões de Destaque):
+     - Disposição em dois grandes cartões interativos lado a lado (ou empilhados 
+       em telas menores), eliminando menus complexos ou subníveis ocultos:
+       a) Cartão 1 — "ATENDER BENEFICIÁRIO":
+          * Ícone: Representação visual de pessoa com cesta de mantimentos.
+          * Ação: Direciona o operador para a Tela 2 (Consulta por CPF e 
+            Registro de Retirada - RF02 / RF03).
+       b) Cartão 2 — "NOVO CADASTRO":
+          * Ícone: Representação visual de pasta com sinal de adição (+).
+          * Ação: Direciona o operador para o formulário de inclusão de uma 
+            nova família beneficiária na base de dados (RF01).
+
+4. REQUISITOS DE ACESSIBILIDADE E USABILIDADE (RNF04)
+--------------------------------------------------------------------------------
+- Alvos de Toque Amplos: Todos os elementos interativos ("Atender Beneficiário", 
+  "Novo Cadastro" e "Sair") devem possuir área de clique/toque mínima de 44x44px 
+  (representada pelas áreas delimitadas de foco), evitando toques acidentais.
+- Contraste Visual: Relação de contraste mínima de 4,5:1 entre textos/ícones e o 
+  plano de fundo para garantir legibilidade sob a iluminação do galpão.
+- Redundância Multimodal: Nenhuma função depende apenas de cor ou apenas de ícone; 
+  todos os botões combinam ícone semântico + rótulo textual explícito em caixa alta.
+- Navegação por Teclado: Ordem lógica de tabulação (Tab) com indicador visual de 
+  foco bem definido ao redor dos cartões e do botão "Sair".
+
+5. CRITÉRIOS DE ACEITAÇÃO (GHERKIN / BDD)
+--------------------------------------------------------------------------------
+Cenário 1: Visualização correta do Menu Inicial após login
+  Dado que o operador voluntário realizou login com credenciais válidas
+  Quando a Tela 1 (Menu Inicial) for carregada
+  Então o sistema deve exibir o cabeçalho com o nome "AMABE", o perfil ativo e o botão "Sair"
+  E deve apresentar os dois cartões principais: "ATENDER BENEFICIÁRIO" e "NOVO CADASTRO".
+
+Cenário 2: Navegação para o fluxo de atendimento (Entrega de Cesta)
+  Dado que o operador está na Tela 1
+  Quando ele clicar ou tocar no cartão "ATENDER BENEFICIÁRIO"
+  Então o sistema deve redirecioná-lo imediatamente para a Tela 2 (Busca e Retirada).
+
+Cenário 3: Navegação para o fluxo de cadastro de família
+  Dado que o operador está na Tela 1
+  Quando ele clicar ou tocar no cartão "NOVO CADASTRO"
+  Então o sistema deve abrir a tela de cadastro de novo beneficiário.
+
+Cenário 4: Encerramento de sessão seguro
+  Dado que o operador concluiu seu turno no balcão
+  Quando ele acionar o botão "Sair" no canto superior direito
+  Então a sessão deve ser encerrada e o usuário redirecionado à tela de login.
+
+6. RASTREABILIDADE DE REQUISITOS E IMPACTO SOCIAL
+--------------------------------------------------------------------------------
+- Requisitos Relacionados: RF01 (Cadastro), RF02 (Consulta), RNF01 (Autenticação), 
+  RNF03 (Desempenho de carregamento) e RNF04 (Acessibilidade).
+- Impacto Comunitário (ODS 2 - Meta 2.1): Ao simplificar o ponto de entrada do 
+  sistema em apenas duas ações claras, reduz-se a curva de aprendizado dos 
+  voluntários e agiliza-se o fluxo de atendimento das 450 famílias atendidas 
+  no Bairro Esperança.
+================================================================================

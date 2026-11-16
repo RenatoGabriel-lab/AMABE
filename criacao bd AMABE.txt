@@ -1,0 +1,84 @@
+-- ============================================================================
+-- PROJETO: MVP Sistema de Gestão de Beneficiários e Retiradas - AMABE
+-- SGBD: MySQL 8.0+
+-- DESCRIÇÃO: Script de criação do banco de dados, tabelas, chaves e índices
+-- ============================================================================-- 
+1. Criação do Banco de Dados com suporte completo a caracteres UTF-8
+CREATE DATABASE IF NOT EXISTS amabe_mvp
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;USE amabe_mvp;
+-- ============================================================================
+
+-- 2. TABELA DE OPERADORES (Autenticação e Segurança - RNF01)
+-- ============================================================================
+CREATE TABLE operadores (
+id_operador INT AUTO_INCREMENT PRIMARY KEY,
+nome_completo VARCHAR(150) NOT NULL,
+usuario_login VARCHAR(50) NOT NULL,
+senha_hash VARCHAR(255) NOT NULL COMMENT 'Hash gerado via passlib/bcrypt',
+perfil ENUM('COORDENACAO', 'VOLUNTARIO') NOT NULL DEFAULT 'VOLUNTARIO',
+ativo BOOLEAN NOT NULL DEFAULT TRUE,
+criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,-- Restrição de Unicidade para o login
+CONSTRAINT uk_operadores_login UNIQUE (usuario_login)
+) ENGINE=InnoDB COMMENT='Armazena os usuários voluntários e coordenação da AMABE';
+
+-- ============================================================================
+-- 3. TABELA DE BENEFICIÁRIOS (Cadastro - RF01 e Consulta Rápida - RF02)
+-- ============================================================================
+CREATE TABLE beneficiarios (
+id_beneficiario INT AUTO_INCREMENT PRIMARY KEY,
+cpf CHAR(11) NOT NULL COMMENT 'Armazenado apenas dígitos (11 caracteres)',
+nome_completo VARCHAR(150) NOT NULL,
+telefone VARCHAR(20) NULL,
+endereco_rua VARCHAR(150) NOT NULL,
+endereco_numero VARCHAR(20) NOT NULL,
+endereco_complemento VARCHAR(100) NULL,
+bairro VARCHAR(80) NOT NULL DEFAULT 'Bairro Esperança',
+membros_familia INT NOT NULL DEFAULT 1,
+status_ativo BOOLEAN NOT NULL DEFAULT TRUE,
+observacoes TEXT NULL,
+cadastrado_por INT NOT NULL,
+criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,-- Chaves e Restrições
+CONSTRAINT uk_beneficiarios_cpf UNIQUE (cpf),
+CONSTRAINT fk_beneficiarios_operador FOREIGN KEY (cadastrado_por) 
+    REFERENCES operadores(id_operador) ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB COMMENT='Cadastro central das famílias atendidas pela AMABE';-- Índices para acelerar a busca no balcão (RF02 e RNF02)
+CREATE INDEX idx_beneficiarios_nome ON beneficiarios(nome_completo);
+CREATE INDEX idx_beneficiarios_status ON beneficiarios(status_ativo);
+
+-- ============================================================================
+-- 4. TABELA DE RETIRADAS DE CESTAS (Registro e Trava Mensal - RF03 e RF04)
+-- ============================================================================
+CREATE TABLE retiradas (
+id_retirada INT AUTO_INCREMENT PRIMARY KEY,
+id_beneficiario INT NOT NULL,
+id_operador INT NOT NULL,
+data_hora_retirada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,-- Coluna gerada (YYYY-MM) para garantir a trava de carência mensal no banco
+mes_ano_referencia CHAR(7) AS (DATE_FORMAT(data_hora_retirada, '%Y-%m')) STORED 
+    COMMENT 'Formato YYYY-MM gerado automaticamente para trava de carência',
+    
+quantidade_cestas TINYINT NOT NULL DEFAULT 1,
+observacao_entrega VARCHAR(255) NULL,
+
+-- Chaves Estrangeiras
+CONSTRAINT fk_retiradas_beneficiario FOREIGN KEY (id_beneficiario) 
+    REFERENCES beneficiarios(id_beneficiario) ON UPDATE CASCADE ON DELETE RESTRICT,
+CONSTRAINT fk_retiradas_operador FOREIGN KEY (id_operador) 
+    REFERENCES operadores(id_operador) ON UPDATE CASCADE ON DELETE RESTRICT,
+    
+-- REGRA DE NEGÓCIO (RF03): Impede que o mesmo beneficiário retire mais de uma vez no mesmo mês
+CONSTRAINT uk_trava_carencia_mensal UNIQUE (id_beneficiario, mes_ano_referencia)
+) ENGINE=InnoDB COMMENT='Registro histórico de entregas com bloqueio de duplicidade mensal';-- Índices para relatórios gerenciais rápidos (RF04 - Total entregue no mês)
+CREATE INDEX idx_retiradas_mes_ano ON retiradas(mes_ano_referencia);
+CREATE INDEX idx_retiradas_data_hora ON retiradas(data_hora_retirada);
+
+-- ============================================================================
+-- 5. DADOS INICIAIS DE TESTE (SEED FICTÍCIO PARA VALIDAÇÃO)
+-- ============================================================================
+-- Inserindo operadora padrão (Senha fictícia em hash bcrypt)
+INSERT INTO operadores (nome_completo, usuario_login, senha_hash, perfil)
+VALUES ('Maria das Graças Silva', 'maria.gracas', '$2b$12$ExemploDeHashBcryptSeguroParaTesteAMABE123456', 'COORDENACAO');-- Inserindo beneficiário fictício conforme roteiro de validação
+INSERT INTO beneficiarios (cpf, nome_completo, telefone, endereco_rua, endereco_numero, membros_familia, cadastrado_por)
+VALUES ('12345678900', 'Maria da Silva Santos', '(11) 99999-0000', 'Rua das Flores', '120', 4, 1);
